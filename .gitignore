@@ -60,7 +60,8 @@ coverage.xml
 # Logs & Runtime Diagnostics
 # ==============================================================================
 *.log
-aeris.log
+*.log.*
+aeris.log*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

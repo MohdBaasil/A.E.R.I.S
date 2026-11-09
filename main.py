@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+from logging.handlers import RotatingFileHandler
 import os
 import sqlite3
 import sys
@@ -71,14 +72,40 @@ TTS_INTERRUPT_PHRASES: frozenset[str] = frozenset({
 })
 
 
-def setup_logging(log_level: str = "INFO") -> None:
+def setup_logging(
+    log_level: str = "INFO",
+    log_file: str = "aeris.log",
+    max_bytes: int = 2 * 1024 * 1024,
+    backup_count: int = 5,
+) -> None:
     level = getattr(logging, str(log_level).upper(), logging.INFO) if isinstance(log_level, str) else logging.INFO
-    logging.basicConfig(
-        filename="aeris.log",
-        level=level,
-        format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-        force=True,
+    root = logging.getLogger()
+    root.setLevel(level)
+
+    # Detach and close any existing file handlers to prevent duplicates or leaked handles
+    for handler in list(root.handlers):
+        if isinstance(handler, (logging.FileHandler, RotatingFileHandler)):
+            root.removeHandler(handler)
+            try:
+                handler.close()
+            except Exception:
+                pass
+
+    formatter = logging.Formatter("%(asctime)s [%(levelname)s] %(name)s: %(message)s")
+
+    log_dir = os.path.dirname(log_file)
+    if log_dir:
+        os.makedirs(log_dir, exist_ok=True)
+
+    handler = RotatingFileHandler(
+        log_file,
+        maxBytes=max(1024, max_bytes),
+        backupCount=max(0, backup_count),
+        encoding="utf-8",
     )
+    handler.setLevel(level)
+    handler.setFormatter(formatter)
+    root.addHandler(handler)
 
 
 # ---------------------------------------------------------------------------
@@ -629,7 +656,12 @@ def main() -> int:
         logger.error("Startup failed: %s", exc)
         return 1
 
-    setup_logging(getattr(config, "log_level", "INFO"))
+    setup_logging(
+        log_level=getattr(config, "log_level", "INFO"),
+        log_file=getattr(config, "log_file", "aeris.log"),
+        max_bytes=getattr(config, "log_max_bytes", 2 * 1024 * 1024),
+        backup_count=getattr(config, "log_backup_count", 5),
+    )
 
     parser = argparse.ArgumentParser(description="AERIS AI Assistant")
     parser.add_argument("--voice", "-v", action="store_true", help="Start directly in voice mode")

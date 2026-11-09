@@ -61,6 +61,9 @@ class Config:
     mic_auto_select: bool = True
     thinking_threshold: float = 2.0
     log_level: str = "INFO"
+    log_max_bytes: int = 2 * 1024 * 1024
+    log_backup_count: int = 5
+    log_file: str = "aeris.log"
     memory_db_path: str = ""
     memory_max_records: int = 500
     ollama_keep_alive: str = "24h"
@@ -171,6 +174,9 @@ class Config:
         mic_auto_select = _get_bool("MIC_AUTO_SELECT", True)
         thinking_threshold = _get_float("THINKING_THRESHOLD", 2.0)
         log_level = os.getenv("LOG_LEVEL", "INFO").strip().upper() or "INFO"
+        log_max_bytes = max(1024, _get_int("LOG_MAX_BYTES", 2 * 1024 * 1024))
+        log_backup_count = max(0, _get_int("LOG_BACKUP_COUNT", 5))
+        log_file = os.getenv("LOG_FILE", "aeris.log").strip() or "aeris.log"
         memory_db_path = os.getenv("AERIS_MEMORY_DB_PATH", "").strip()
         if not memory_db_path:
             memory_db_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "data", "aeris_memory.sqlite3")
@@ -217,6 +223,9 @@ class Config:
             mic_auto_select=mic_auto_select,
             thinking_threshold=thinking_threshold,
             log_level=log_level,
+            log_max_bytes=log_max_bytes,
+            log_backup_count=log_backup_count,
+            log_file=log_file,
             memory_db_path=memory_db_path,
             memory_max_records=memory_max_records,
             ollama_keep_alive=ollama_keep_alive,

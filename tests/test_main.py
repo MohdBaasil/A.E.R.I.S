@@ -127,8 +127,9 @@ def test_main_provider_test_flag(mock_provider_test, mock_load_config, mock_logg
 @patch("main.SpeechToText")
 @patch("main.TextToSpeech")
 @patch("main.run_voice_mode")
-def test_main_voice_mode_flag(mock_run_voice, mock_tts_cls, mock_stt_cls, mock_create_provider, mock_load_config, mock_logging):
+def test_main_voice_mode_flag(mock_run_voice, mock_tts_cls, mock_stt_cls, mock_create_provider, mock_load_config, mock_logging, tmp_path):
     mock_config = MagicMock()
+    mock_config.memory_db_path = str(tmp_path / "memory.db")  # prevent MagicMock/ filesystem pollution
     mock_load_config.return_value = mock_config
     mock_provider = MagicMock()
     mock_create_provider.return_value = mock_provider
@@ -153,8 +154,9 @@ def test_main_voice_mode_flag(mock_run_voice, mock_tts_cls, mock_stt_cls, mock_c
 @patch("main.SpeechToText")
 @patch("main.TextToSpeech")
 @patch("main.run_text_mode")
-def test_main_voice_mode_mic_failure_fallback_to_text(mock_run_text, mock_tts_cls, mock_stt_cls, mock_create_provider, mock_load_config, mock_logging):
+def test_main_voice_mode_mic_failure_fallback_to_text(mock_run_text, mock_tts_cls, mock_stt_cls, mock_create_provider, mock_load_config, mock_logging, tmp_path):
     mock_config = MagicMock()
+    mock_config.memory_db_path = str(tmp_path / "memory.db")  # prevent MagicMock/ filesystem pollution
     mock_load_config.return_value = mock_config
     mock_provider = MagicMock()
     mock_create_provider.return_value = mock_provider
@@ -179,8 +181,9 @@ def test_main_voice_mode_mic_failure_fallback_to_text(mock_run_text, mock_tts_cl
 @patch("main.SpeechToText", side_effect=Exception("PyAudio driver failed"))
 @patch("main.TextToSpeech")
 @patch("main.run_text_mode")
-def test_main_voice_mode_init_exception_fallback_to_text(mock_run_text, mock_tts_cls, mock_stt_cls, mock_create_provider, mock_load_config, mock_logging):
+def test_main_voice_mode_init_exception_fallback_to_text(mock_run_text, mock_tts_cls, mock_stt_cls, mock_create_provider, mock_load_config, mock_logging, tmp_path):
     mock_config = MagicMock()
+    mock_config.memory_db_path = str(tmp_path / "memory.db")  # prevent MagicMock/ filesystem pollution
     mock_load_config.return_value = mock_config
     mock_provider = MagicMock()
     mock_create_provider.return_value = mock_provider
